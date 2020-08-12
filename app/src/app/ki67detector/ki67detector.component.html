@@ -1,0 +1,121 @@
+<div class="fluid-container">
+    <ngx-spinner
+        bdColor="rgba(0, 0, 0, 0.8)"
+        size="medium"
+        color="#fff"
+        type="square-jelly-box"
+        [fullScreen]="true"
+    >
+        <p style="color: white;">{{ systemMsg }}</p>
+    </ngx-spinner>
+    <simple-notifications></simple-notifications>
+    <div
+        class="back nav-bar-group border-bottom pb-3 pt-3 justify-content-between"
+    >
+        <div class="nav-bar-group ml-3">
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-primary px-3"
+                (click)="imgUpload.click()"
+            >
+                Upload Image
+                <input
+                    name="inputImage"
+                    #imgUpload
+                    type="file"
+                    (change)="onImageSelect($event)"
+                    style="display: none;"
+                />
+                <fa-icon
+                    class="ml-2"
+                    [icon]="faQuestionCircle"
+                    tooltip="The maximum size of the uploaded image is 2000 x 2000."
+                    placement="right"
+                ></fa-icon>
+            </button>
+            <button class="btn btn-sm btn-link or-btn" disabled>or</button>
+            <div>
+                <select
+                    class="custom-select"
+                    [(ngModel)]="selectedSample"
+                    (change)="onSampleSelect($event)"
+                >
+                    <option [ngValue]="null" disabled>
+                        select from database
+                    </option>
+                    <option *ngFor="let sample of samples" [value]="sample">
+                        {{ sample }}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <small class="mr-3 mt-2 text-muted">
+            Ki-67 Detector
+        </small>
+    </div>
+    <div class="row m-2">
+        <div *ngIf="isImageSelected" class="left-panel-container pr-2">
+            <div class="card card-size shadow">
+                <div class="card-header">
+                    Detection Model
+                </div>
+                <div class="card-body">
+                    <select class="custom-select" disabled required>
+                        <option>
+                            default model
+                        </option>
+                    </select>
+                </div>
+                <div class="card-body" style="margin-top: -1.5rem;">
+                    <button
+                        class="btn btn-sm btn-outline-primary btn-block"
+                        (click)="onDetectClick()"
+                        [disabled]="!isImageLoaded"
+                    >
+                        Detect
+                        <fa-icon
+                            class="ml-2"
+                            [icon]="faQuestionCircle"
+                            tooltip="Detect selected ki67 image with selected model."
+                            placement="top"
+                        ></fa-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div
+            class="img-container shadow"
+            [ngStyle]="{
+                width: isImageSelected ? '75%' : '100%'
+            }"
+        >
+            <div *ngIf="!isImageLoaded" class="msg-container">
+                <p class="text-center text-secondary">
+                    <small>
+                        please upload / select Ki67 image from database to
+                        continue
+                    </small>
+                </p>
+            </div>
+            <!-- <nav
+                [hidden]="!isImageLoaded"
+                role="navigation"
+                id="detector-osd-navbar"
+            >
+                <button id="detector-zoom-in" class="btn osd-nav-btn">
+                    <fa-icon [icon]="faSearchPlus"></fa-icon>
+                </button>
+                <button id="detector-zoom-out" class="btn osd-nav-btn">
+                    <fa-icon [icon]="faSearchMinus"></fa-icon>
+                </button>
+                <button id="detector-zoom-fit" class="btn osd-nav-btn">
+                    <fa-icon [icon]="faHome"></fa-icon>
+                </button>
+                <button id="detector-full-screen" class="btn osd-nav-btn">
+                    <fa-icon [icon]="faExpandArrowsAlt"></fa-icon>
+                </button>
+            </nav> -->
+            <div id="detectorViewer" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+</div>

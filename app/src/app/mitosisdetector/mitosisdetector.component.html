@@ -1,0 +1,253 @@
+<div class="row m-2">
+    <ngx-spinner
+        bdColor="rgba(0, 0, 0, 0.8)"
+        size="medium"
+        color="#fff"
+        type="square-jelly-box"
+        [fullScreen]="true"
+    >
+        <p style="color: white;">{{ systemMsg }}</p>
+    </ngx-spinner>
+    <simple-notifications></simple-notifications>
+    <div class="left-panel-container pr-2">
+        <div class="card card-size shadow">
+            <div class="card-header">
+                Detection Model
+            </div>
+            <div class="card-body">
+                <select
+                    class="custom-select"
+                    [disabled]="!imageSelected || isLoaded"
+                    required
+                >
+                    <option
+                        *ngFor="let model of models"
+                        [value]="model"
+                        [selected]="selectedModel"
+                    >
+                        {{ model }}
+                    </option>
+                </select>
+            </div>
+            <div class="card-body" style="margin-top: -1.5rem;">
+                <button
+                    class="btn btn-sm btn-outline-primary btn-block"
+                    [disabled]="!imageSelected || isLoaded"
+                    (click)="onConfirm()"
+                >
+                    Detect
+                    <fa-icon
+                        class="ml-2"
+                        [icon]="faQuestionCircle"
+                        tooltip="Detect {{
+                            imageName !== '' ? imageName : 'selected image'
+                        }} with {{ selectedModel }}."
+                        placement="top"
+                    ></fa-icon>
+                </button>
+            </div>
+        </div>
+        <div [hidden]="!isLoaded" class="card card-size shadow mt-1">
+            <div class="card-header">
+                Filter Detected Objects
+            </div>
+            <div class="card-body">
+                <small>
+                    Probability Threshold (0.00-1.00):
+                    <strong>{{ threshold }}</strong>
+                </small>
+                <mat-slider
+                    thumbLabel
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    [(ngModel)]="threshold"
+                ></mat-slider>
+            </div>
+            <div class="card-body" style="margin-top: -2rem;">
+                <button
+                    class="btn btn-sm btn-outline-primary btn-block"
+                    [disabled]="!isLoaded"
+                    (click)="updateThreshold()"
+                >
+                    Apply
+                </button>
+            </div>
+        </div>
+        <div [hidden]="!isLoaded" class="card card-size shadow mt-1">
+            <div class="card-header">
+                Labels Found
+            </div>
+            <div *ngIf="labels.length > 0" class="card-body">
+                <span
+                    class="badge label-badge ml-2 text-white"
+                    *ngFor="let label of labels"
+                    [ngStyle]="{
+                        'background-color':
+                            labelsTxtStyle[label] === 'none'
+                                ? colorHash[label]
+                                : 'grey',
+                        'text-decoration': labelsTxtStyle[label]
+                    }"
+                    (click)="onLabelClick(label)"
+                >
+                    {{ label }}
+                </span>
+            </div>
+            <div *ngIf="labels.length == 0" class="card-body text-center">
+                <small class="text-secondary">
+                    no label found, please adjust threshold value and try again
+                </small>
+            </div>
+            <div class="card-body" style="margin-top: -1rem;">
+                <button
+                    class="btn btn-sm btn-outline-primary btn-block"
+                    [disabled]="labels.length == 0 || isDetailsDisabled"
+                    (click)="onDetailClick()"
+                >
+                    Details
+                    <fa-icon
+                        class="ml-2"
+                        [icon]="faQuestionCircle"
+                        tooltip="Click to see detailed report. You can also click any label tag above to hide it from the viewer and the report."
+                        placement="top"
+                    ></fa-icon>
+                </button>
+            </div>
+        </div>
+        <!-- <div [hidden]="!isLoaded" class="card card-size shadow">
+            <div class="card-header">
+                Re-Label Objects
+            </div>
+            <div class="card-body">
+                <button
+                    class="btn btn-sm btn-outline-primary btn-block"
+                    routerLink="/annotator"
+                    [state]="{ name: imageName, data: dataForAnnotator }"
+                >
+                    Modify / Add Labels
+                    <fa-icon
+                        class="ml-2"
+                        [icon]="faQuestionCircle"
+                        tooltip="If you feel like the detection result is not accurate enough, you can use this tool to re-label current image and then submit re-traning request using the advanced re-learning tool."
+                        placement="top"
+                    ></fa-icon>
+                </button>
+            </div>
+        </div> -->
+    </div>
+    <div class="img-container shadow">
+        <div *ngIf="!isLoaded && !imageSelected" class="msg-container">
+            <p class="text-center text-secondary">
+                <small>
+                    please upload image / select image from database to continue
+                </small>
+            </p>
+        </div>
+
+        <div id="detectorViewer" style="width: 100%; height: 100%;"></div>
+    </div>
+</div>
+
+<!-- ------------------------------------------ -->
+<!--      Image Upload Confirm Modal            -->
+<!-- ------------------------------------------ -->
+<div
+    class="modal fade"
+    id="uploadConfirmModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="uploadConfirmTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <small>
+                    <span style="text-decoration: underline;">
+                        {{ imageName ? imageName : "unknown" }}
+                    </span>
+                    with
+                    <span style="text-decoration: underline;">
+                        {{ selectedModel }}
+                    </span>
+                    selected, would you like to start detecting?
+                </small>
+            </div>
+            <div class="modal-footer text-center">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    data-dismiss="modal"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-sm btn-primary"
+                    (click)="onConfirm()"
+                >
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ------------------------------------------ -->
+<!--             Details Modal                  -->
+<!-- ------------------------------------------ -->
+<div
+    class="modal fade"
+    id="detailsModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="detailsTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsTitle">Details</h5>
+                <button
+                    type="button"
+                    class="close modal-close-btn"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-sm mb-1 text-center">
+                    <thead class="text-center">
+                        <tr>
+                            <td>
+                                <small>
+                                    LABEL
+                                </small>
+                            </td>
+                            <td>
+                                <small>
+                                    COUNT
+                                </small>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let label of labels">
+                            <td *ngIf="labelsTxtStyle[label] === 'none'">
+                                <small>
+                                    {{ label ? label : "null" }}
+                                </small>
+                            </td>
+                            <td *ngIf="labelsTxtStyle[label] === 'none'">
+                                <small>{{ labelsCount[label] }}</small>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <canvas id="myChart" width="100%" height="100%"></canvas>
+            </div>
+        </div>
+    </div>
+</div>

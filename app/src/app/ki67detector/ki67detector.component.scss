@@ -1,0 +1,121 @@
+[hidden] {
+    display: none !important;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+}
+
+select {
+    border-radius: 0 !important;
+    font-size: 14px !important;
+}
+
+.nav-bar-group {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.or-btn {
+    min-width: 3rem !important;
+}
+
+.modal-content {
+    border-radius: 0 !important;
+}
+
+.modal-close-btn {
+    min-width: auto !important;
+}
+
+.modal-title {
+    font-weight: normal !important;
+    font-size: 18px !important;
+}
+
+.card-header {
+    font-size: 14px !important;
+}
+
+.left-panel-container {
+    width: 25% !important;
+    height: 80vh !important;
+
+    overflow-y: scroll;
+
+    // justify-content: space-around;
+    // display: flex !important;
+    // flex-direction: column;
+    // bottom-p: 10px;
+}
+
+.img-container {
+    position: relative;
+
+    // width: 75% !important;
+    height: 80vh !important;
+    overflow: hidden;
+}
+
+// .img-container {
+//     position: relative;
+
+//     height: 77vh !important;
+//     overflow: hidden;
+// }
+
+#detector-osd-navbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    z-index: 10;
+}
+
+#detectorViewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.osd-nav-btn {
+    opacity: 0.5;
+    background-color: Black;
+
+    color: #dbdbdb;
+
+    min-width: 0 !important;
+    border: none;
+    outline: none;
+}
+
+.osd-nav-btn:hover {
+    color: gray;
+}
+
+.img-canvas {
+    padding: 0;
+    margin: auto;
+    display: block;
+}
+
+.msg-container {
+    margin-top: 35vh !important;
+}
+
+.card {
+    border-radius: 0 !important;
+}
+
+.card-size {
+    width: 100% !important;
+}
+
+// @
+// HIDE SCROLL BAR
+// @
+::-webkit-scrollbar {
+    width: 0px; /* Remove scrollbar space */
+    background: transparent; /* Optional: just make scrollbar invisible */
+}

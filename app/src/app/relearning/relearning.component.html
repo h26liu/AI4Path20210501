@@ -1,0 +1,181 @@
+<div class="fluid-container">
+    <ngx-spinner
+        bdColor="rgba(0, 0, 0, 0.8)"
+        size="medium"
+        color="#fff"
+        type="square-jelly-box"
+        [fullScreen]="true"
+    >
+        <p style="color: white;">{{ systemMsg }}</p>
+    </ngx-spinner>
+    <simple-notifications></simple-notifications>
+    <div class="m-3">
+        <div class="alert alert-primary" role="alert">
+            Welcome to our re-learning tool!
+            <br />
+            <br />
+            Please select labeled images that you would like to use for
+            re-learning (you can use our
+            <span style="font-style: italic; font-weight: bold;">
+                image annotator tool
+            </span>
+            which can be found under
+            <span style="font-style: italic; font-weight: bold;">
+                Advanced Tools
+            </span>
+            to label new images). Then you can select any model as base model to
+            re-learning from the step #2. Last but not the least, in the step
+            #3, you can write some comments including the purpose of the
+            training, and whether new categories have been added, etc. Then
+            please make sure everything looks good and submit the re-learning
+            request.
+            <br />
+            <br />
+            Our developer will handle your request manually and normally the
+            process will be done in about a week. You will be notified once the
+            re-trained model is ready.
+        </div>
+    </div>
+    <mat-vertical-stepper #stepper>
+        <mat-step label="Labeled Images" [completed]="false">
+            <div *ngIf="labeledImages.length == 0">
+                <small class="text-muted">no image found in database :/</small>
+            </div>
+            <div [hidden]="!labeledImagesReady" class="row">
+                <div class="col-2" *ngFor="let image of labeledImages">
+                    <div
+                        id="{{ image.name }}-div"
+                        class="col-12 p-0 mt-4 image-canvas-div"
+                        (click)="onImageViewerOpen(image)"
+                    >
+                        <div class="image-canvas-info">
+                            <p>{{ image.name }}</p>
+                            <small
+                                *ngIf="image.created != null"
+                                style="font-style: italic;"
+                            >
+                                Created on {{ image.created }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="row justify-content-between">
+                        <small class="text-muted mt-2 ml-3">
+                            {{ image.name }}
+                        </small>
+                        <label class="switch mt-2 mr-3">
+                            <input
+                                type="checkbox"
+                                id="checkbox-{{ image.name }}"
+                                (change)="onCheckboxChange(image)"
+                            />
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <hr />
+                </div>
+            </div>
+        </mat-step>
+        <mat-step label="Base Model" [completed]="false">
+            <div class="card mt-4">
+                <div class="card-body">
+                    <small class="card-title text-muted">
+                        Please select a base model:
+                    </small>
+                </div>
+                <div class="card-body mt-n4">
+                    <select
+                        class="custom-select"
+                        [(ngModel)]="selectedModel"
+                        required
+                    >
+                        <option *ngFor="let model of models" [value]="model">
+                            {{ model }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </mat-step>
+
+        <mat-step label="Training Request" [completed]="false">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <p class="card-title mt-3">
+                        Number of labeled images selected for training:
+                        <span
+                            class="badge badge-primary ml-1 p-1"
+                            style="min-width: 2rem;"
+                        >
+                            {{ selectedImages.length }}
+                        </span>
+                    </p>
+                    <p class="card-title">
+                        Base model selected:
+                        <span
+                            class="badge badge-primary ml-1 p-1"
+                            style="min-width: 2rem;"
+                        >
+                            {{
+                                selectedModel !== ""
+                                    ? selectedModel
+                                    : "no model selected"
+                            }}
+                        </span>
+                    </p>
+                    <small class="text-muted">
+                        Comment:
+                    </small>
+                    <textarea
+                        [(ngModel)]="comment"
+                        name="comment"
+                        style="border-radius: 0;"
+                        class="form-control"
+                        rows="3"
+                        placeholder="enter your comment here"
+                    ></textarea>
+                </div>
+                <div class="card-footer">
+                    <button
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="onConfirmClick()"
+                        [disabled]="selectedImages.length === 0"
+                    >
+                        Submit Request
+                    </button>
+                </div>
+            </div>
+        </mat-step>
+    </mat-vertical-stepper>
+</div>
+<!-- ------------------------------------------ -->
+<!--         Labeled Image with OSD             -->
+<!-- ------------------------------------------ -->
+<div
+    class="modal fade"
+    id="imageViewerModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="imageViewerTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content" style="height: 70vh;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="annotationClassModalTitle">
+                    {{ selectedImage.name }}
+                    <small> created on {{ selectedImage.created }} </small>
+                </h5>
+                <button
+                    type="button"
+                    class="close modal-close-btn"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="imageViewer" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>

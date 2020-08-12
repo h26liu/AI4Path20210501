@@ -1,0 +1,111 @@
+<div class="fluid-container">
+    <div
+        class="back nav-bar-group border-bottom pb-3 pt-3 justify-content-between"
+    >
+        <div class="nav-bar-group ml-3">
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-primary px-3"
+                (click)="imgUpload.click()"
+            >
+                Upload Image
+                <input
+                    name="inputImage"
+                    #imgUpload
+                    type="file"
+                    (change)="onImageSelect($event)"
+                    style="display: none;"
+                />
+                <fa-icon
+                    class="ml-2"
+                    [icon]="faQuestionCircle"
+                    tooltip="The maximum size of the uploaded image is 2000 x 2000."
+                    placement="right"
+                ></fa-icon>
+            </button>
+            <button class="btn btn-sm btn-link or-btn" disabled>or</button>
+            <div>
+                <select
+                    class="custom-select"
+                    [(ngModel)]="selectedSample"
+                    (change)="onSampleSelect($event)"
+                >
+                    <option [ngValue]="null" disabled>
+                        select from database
+                    </option>
+                    <option *ngFor="let sample of samples" [value]="sample">
+                        {{ sample }}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <small class="mr-3 mt-2 text-muted">
+            Segmented Mitosis Image Detector
+        </small>
+    </div>
+    <div [hidden]="isImageSelected" class="row m-2">
+        <div class="img-container shadow">
+            <div class="msg-container">
+                <p class="text-center text-secondary">
+                    <small>
+                        please upload image / select image from database to
+                        continue
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+    <app-mitosisdetector
+        *ngIf="isImageSelected"
+        [imageSrc]="image"
+        (fetchImagesList)="fetchImagesList()"
+    ></app-mitosisdetector>
+    <!-- ------------------------------------------ -->
+    <!--      Image Upload Confirm Modal            -->
+    <!-- ------------------------------------------ -->
+    <div
+        class="modal fade"
+        id="uploadErrModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="uploadErrTitle"
+        aria-hidden="true"
+    >
+        <div
+            class="modal-dialog modal-dialog-centered modal-sm"
+            role="document"
+        >
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsTitle"></h5>
+                    <button
+                        type="button"
+                        class="close modal-close-btn"
+                        data-dismiss="modal"
+                        aria-label="Close"
+                    >
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center m-2">
+                    <small>
+                        The size of
+                        <strong>
+                            {{ imageName ? imageName : "unknown image" }}
+                        </strong>
+                        is
+                        <strong>
+                            {{ imageWidth ? imageWidth : "unknown" }} *
+                            {{ imageHeight ? imageHeight : "unknown" }}
+                        </strong>
+                        , which exceeds the size limit of
+                        <strong>2000 * 2000</strong>.
+                    </small>
+                    <br />
+                    <br />
+                    <small>Please select different image and try again.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,352 @@
+<div class="fluid-container">
+    <ngx-spinner
+        bdColor="rgba(0, 0, 0, 0.8)"
+        size="medium"
+        color="#fff"
+        type="square-jelly-box"
+        [fullScreen]="true"
+    >
+        <p style="color: white;">{{ systemMsg }}</p>
+    </ngx-spinner>
+    <simple-notifications></simple-notifications>
+    <div class="row m-2">
+        <div>
+            <span
+                class="badge label-add-btn px-2 ml-1 mb-1"
+                (click)="onAddLabelClick()"
+            >
+                <fa-icon [icon]="faPlus"></fa-icon>
+                <span class="ml-1">Label</span>
+            </span>
+        </div>
+        <div>
+            <span
+                *ngFor="let label of labels"
+                class="badge label-badge-btn px-2 py-1 ml-2 mb-1"
+                [ngStyle]="{
+                    'background-color':
+                        label == selectedLabel ? colors[label] : '#dbdbdb'
+                }"
+                (click)="onLabelTagClick(label)"
+            >
+                <span class="mr-2">{{ label }}</span>
+                <fa-icon
+                    [icon]="faPencilAlt"
+                    (click)="onLabelEditClick(label)"
+                ></fa-icon>
+            </span>
+        </div>
+    </div>
+    <div class="row m-1">
+        <div class="col-2 left-image-list">
+            <div
+                *ngFor="let image of images"
+                id="{{ image.name }}-div"
+                class="col-12 p-0 mb-3 image-list-div"
+                [ngStyle]="{
+                    border:
+                        selectedImage == image.image
+                            ? '3px solid #0083c7'
+                            : 'none'
+                }"
+                (click)="onImageListClick(image.image, image.name)"
+            >
+                <img src="{{ image.src }}" width="100%" />
+                <div class="image-list-info">
+                    <small>{{ image.name }}</small>
+                </div>
+            </div>
+            <div
+                class="col-12 pt-5 pb-5 bg-transparent left-panel-add-image"
+                (click)="imgUpload.click()"
+            >
+                <div class="text-center">
+                    <fa-icon [icon]="faPlus"></fa-icon>
+                </div>
+                <div class="text-center">
+                    <span>.jpg / .png / .zip</span>
+                </div>
+                <input
+                    name="inputImage"
+                    #imgUpload
+                    type="file"
+                    (change)="onUploadClick($event)"
+                    style="display: none;"
+                />
+            </div>
+        </div>
+        <div
+            class="col-8 img-container shadow"
+            [ngStyle]="{ 'overflow-x': overflowX, 'overflow-y': overflowY }"
+        >
+            <div
+                [hidden]="isImageLoaded || !isCanvasReady"
+                class="msg-container"
+            >
+                <p class="text-center text-secondary">
+                    <small>
+                        please upload image to continue
+                    </small>
+                </p>
+            </div>
+            <canvas
+                [hidden]="!isImageLoaded"
+                id="myCanvas"
+                class="img-canvas"
+                (mouseup)="canvasOnMouseUp($event)"
+                (mousedown)="canvasOnMouseDown($event)"
+                (mousemove)="canvasOnMouseMove($event)"
+            ></canvas>
+        </div>
+        <div class="col-2 right-panel-container">
+            <div class="card card-size">
+                <div class="card-header shadow">
+                    <fa-icon [icon]="faObjectUngroup"></fa-icon>
+                    Annotations
+                </div>
+                <div class="card-body">
+                    <div *ngIf="isAnnotationEmpty" class="text-center">
+                        <small class="text-muted">
+                            no annotation
+                        </small>
+                    </div>
+                    <div
+                        *ngFor="let annotation of annotations[imageName]"
+                        class="text-center"
+                    >
+                        <span
+                            class="badge annotations-badge col-9 py-2 mb-2 mr-2"
+                            [ngStyle]="{
+                                'background-color': annotation.color
+                            }"
+                            (mouseover)="annotationOnMouseOver(annotation)"
+                            (mouseout)="annotationOnMouseOut()"
+                            (click)="onAnnotationClick(annotation)"
+                        >
+                            {{ annotation.name }}
+                        </span>
+                        <fa-icon
+                            class="delete-icon-btn"
+                            [icon]="faTrashAlt"
+                            (mouseover)="annotationOnMouseOver(annotation)"
+                            (mouseout)="annotationOnMouseOut()"
+                            (click)="onDeleteClick(annotation)"
+                        ></fa-icon>
+                    </div>
+
+                    <!-- <button
+                        class="btn btn-sm btn-primary btn-block"
+                        (click)="addLabelObject()"
+                        [disabled]="!isImageLoaded"
+                    >
+                        Confirm
+                    </button>
+                    <button
+                        class="btn btn-sm btn-outline-primary btn-block"
+                        (click)="onResetClick()"
+                        [disabled]="!isImageLoaded"
+                    >
+                        Reset Annotation
+                    </button>
+                    <button
+                        class="btn btn-sm btn-outline-primary btn-block"
+                        (click)="onFinishClick()"
+                        [disabled]="!isImageLoaded"
+                    >
+                        Finish Annotation
+                    </button> -->
+                </div>
+                <div class="card-footer">
+                    <button
+                        class="btn btn-sm btn-primary btn-block"
+                        (click)="saveLabeledImage()"
+                    >
+                        Finish Annotation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ------------------------------------------ -->
+<!--                 Image Name                 -->
+<!-- ------------------------------------------ -->
+<div
+    class="modal fade"
+    id="imageNameModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="imageNameModalTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageNameModalTitle">Add Image</h5>
+                <button
+                    type="button"
+                    class="close modal-close-btn"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="margin-top: -1rem;">
+                <div class="mb-1" style="word-break: break-all;">
+                    <small class="text-danger">
+                        Image name must be unique. The image with the same name
+                        will be overwritten.
+                    </small>
+                </div>
+                <small>
+                    Please enter a name for the image:
+                </small>
+                <input
+                    type="text"
+                    class="form-control mt-2"
+                    placeholder="enter image name here"
+                    [(ngModel)]="imageName"
+                />
+            </div>
+            <div class="modal-footer text-center">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-primary btn-block"
+                    (click)="onImageUpload()"
+                    [disabled]="imageName == ''"
+                >
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ----------------------------- -->
+<!--          Label Modal          -->
+<!-- ----------------------------- -->
+<div
+    class="modal fade"
+    id="labelModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="labelModalTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="labelModalTitle">
+                    {{ isNewLabel ? "Create Label" : "Edit Label" }}
+                </h5>
+                <button
+                    type="button"
+                    class="close modal-close-btn"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="margin-top: -1rem;">
+                <small>
+                    Label Name:
+                </small>
+                <input
+                    type="text"
+                    class="form-control modal-input my-2"
+                    placeholder="enter label name here"
+                    [(ngModel)]="labelInput"
+                />
+                <small>
+                    Label Color:
+                </small>
+                <input
+                    readonly
+                    class="form-control modal-color-input mt-2"
+                    [value]="colorInput"
+                    [style.background]="colorInput"
+                    [(colorPicker)]="colorInput"
+                />
+            </div>
+            <div class="modal-footer text-center">
+                <button
+                    class="btn btn-sm btn-primary btn-block"
+                    (click)="onAddLabelConfirm()"
+                    [disabled]="labelInput == ''"
+                >
+                    {{ isNewLabel ? "Create" : "Save" }}
+                </button>
+                <button
+                    *ngIf="!isNewLabel"
+                    class="btn btn-sm btn-danger btn-block"
+                    (click)="onDeleteLabelClick()"
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ----------------------------- -->
+<!--   Annotation Class Modal      -->
+<!-- ----------------------------- -->
+<div
+    class="modal fade"
+    id="annotationClassModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="annotationClassModalTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="annotationClassModalTitle">
+                    Change Label
+                </h5>
+                <button
+                    type="button"
+                    class="close modal-close-btn"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="margin-top: -1rem;">
+                <small>
+                    Label:
+                </small>
+                <!-- <input
+                    type="text"
+                    class="form-control modal-input my-2"
+                    placeholder="enter image name here"
+                    [(ngModel)]="newImageName"
+                /> -->
+                <select
+                    class="custom-select mt-2"
+                    required
+                    [(ngModel)]="newAnnotationClass"
+                >
+                    <option
+                        *ngFor="let label of labels"
+                        [value]="label"
+                        [selected]="label === selectedLabel"
+                    >
+                        {{ label }}
+                    </option>
+                </select>
+            </div>
+            <div class="modal-footer text-center">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-primary btn-block"
+                    (click)="onAnnotationClassChange()"
+                >
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
