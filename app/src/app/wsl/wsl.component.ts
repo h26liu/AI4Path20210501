@@ -204,7 +204,7 @@ export class WslComponent {
 
         // To know whether file exist or not before making upload
         this.http
-            .get(`${this.BASE_URL}/api/dzi/status`, { headers: headers })
+            .get(`${this.BASE_URL}/brain/dzi/status`, { headers: headers })
             .subscribe((res: any) => {
                 // console.log(JSON.stringify(res));
                 if (res.status === 'file is present') {
@@ -215,13 +215,13 @@ export class WslComponent {
                     let resData = JSON.parse(res.data);
 
                     this.dziData = {
-                        Url: `${this.BASE_URL}/wholeslide/${folderName}/output/${this.imageName}_files/`,
-                        Format: resData.Image.$.Format,
-                        Overlap: resData.Image.$.Overlap,
-                        TileSize: resData.Image.$.TileSize,
+                        Url: `${this.BASE_URL}/public/brain/wsl/${folderName}/output/${this.imageName}_files/`,
+                        Format: resData.Format,
+                        Overlap: resData.Overlap,
+                        TileSize: resData.TileSize,
                         Size: {
-                            Width: resData.Image.Size[0].$.Width,
-                            Height: resData.Image.Size[0].$.Height,
+                            Width: resData.Width,
+                            Height: resData.Height,
                         },
                     };
 
@@ -238,7 +238,7 @@ export class WslComponent {
                 });
                 const req = new HttpRequest(
                     'POST',
-                    `${this.BASE_URL}/api/dzi/upload`,
+                    `${this.BASE_URL}/brain/dzi/upload`,
                     this.image.slice(uploadedBytes, this.image.size + 1),
                     {
                         headers: uploadHeaders,
@@ -271,13 +271,13 @@ export class WslComponent {
                                 );
 
                                 this.dziData = {
-                                    Url: `${this.BASE_URL}/wholeslide/${folderName}/output/${this.imageName}_files/`,
-                                    Format: res.body.Image.$.Format,
-                                    Overlap: res.body.Image.$.Overlap,
-                                    TileSize: res.body.Image.$.TileSize,
+                                    Url: `${this.BASE_URL}/public/brain/wsl/${folderName}/output/${this.imageName}_files/`,
+                                    Format: res.body.Format,
+                                    Overlap: res.body.Overlap,
+                                    TileSize: res.body.TileSize,
                                     Size: {
-                                        Width: res.body.Image.Size[0].$.Width,
-                                        Height: res.body.Image.Size[0].$.Height,
+                                        Width: res.body.Width,
+                                        Height: res.body.Height,
                                     },
                                 };
 

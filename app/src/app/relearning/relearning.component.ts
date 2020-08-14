@@ -67,7 +67,7 @@ export class RelearningComponent implements OnInit {
     }
 
     fetchModelList() {
-        this.http.get(`${this.BASE_URL}/api/list/model`).subscribe(
+        this.http.get(`${this.BASE_URL}/brain/models`).subscribe(
             (res) => {
                 this.models = (<Object>res)['files'];
                 // set default model
@@ -97,7 +97,7 @@ export class RelearningComponent implements OnInit {
     onConfirmClick() {
         const self = this;
         self.http
-            .post<any>(`${self.BASE_URL}/api/list/retraining/save`, {
+            .post<any>(`${self.BASE_URL}/brain/retraining/save`, {
                 created: Date.now(),
                 data: {
                     model: self.selectedModel,
@@ -125,16 +125,16 @@ export class RelearningComponent implements OnInit {
     fetchLabeledImages() {
         const self = this;
 
-        this.http.get(`${this.BASE_URL}/api/list/labeled/`).subscribe(
+        this.http.get(`${this.BASE_URL}/brain/labeled`).subscribe(
             (res) => {
                 try {
                     (<Object>res)['files'].map((file) => {
-                        fetch(`${this.BASE_URL}/labeled/objects/${file}`)
+                        fetch(`${this.BASE_URL}/public/brain/labeled/objects/${file}`)
                             .then((res) => res.json())
                             .then(async (out) => {
                                 let created = out.created;
                                 let response = await fetch(
-                                    `${this.BASE_URL}/labeled/original/${out.name}`
+                                    `${this.BASE_URL}/public/brain/labeled/original/${out.name}`
                                 );
                                 let data = await response.blob();
                                 let imgURL = <string>await this.toBase64(data);

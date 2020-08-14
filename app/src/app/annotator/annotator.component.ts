@@ -113,7 +113,7 @@ export class AnnotatorComponent implements OnInit {
         this.systemMsg = 'getting annotator ready';
         this._spinner.show();
 
-        this.fetchImagesList();
+        // this.fetchImagesList();
         this.onLabelTagClick(this.labels[0]); // set default cell
 
         // this.fetchLabeledImages();
@@ -137,7 +137,7 @@ export class AnnotatorComponent implements OnInit {
                 const self = this;
 
                 let response = await fetch(
-                    `${this.BASE_URL}/uploads/${self.dataFromDetector.name}`
+                    `${this.BASE_URL}/public/brain/segmented/${self.dataFromDetector.name}`
                 );
                 let data = await response.blob();
                 let imageSrc = <string>await this.toBase64(data);
@@ -330,7 +330,7 @@ export class AnnotatorComponent implements OnInit {
 
         setTimeout(async () => {
             const value = event.target.value;
-            let response = await fetch(`${this.BASE_URL}/uploads/${value}`);
+            let response = await fetch(`${this.BASE_URL}/public/brain/segmented/${value}`);
             let data = await response.blob();
 
             self.imageName = self.selectedSample;
@@ -351,16 +351,16 @@ export class AnnotatorComponent implements OnInit {
         }, 1000);
     }
 
-    fetchImagesList() {
-        this.http.get(`${this.BASE_URL}/api/list/segmented`).subscribe(
-            (res) => {
-                this.samples = (<Object>res)['files'];
-            },
-            (err) => {
-                console.log(err);
-            }
-        );
-    }
+    // fetchImagesList() {
+    //     this.http.get(`${this.BASE_URL}/public/brain/segmented`).subscribe(
+    //         (res) => {
+    //             this.samples = (<Object>res)['files'];
+    //         },
+    //         (err) => {
+    //             console.log(err);
+    //         }
+    //     );
+    // }
 
     // @
     // LABEL RELATED
@@ -593,7 +593,7 @@ export class AnnotatorComponent implements OnInit {
         });
 
         self.http
-            .post<any>(`${self.BASE_URL}/api/list/labeled/save`, {
+            .post<any>(`${self.BASE_URL}/brain/labeled/save`, {
                 created: Date.now(),
                 data: newAnnotations,
             })

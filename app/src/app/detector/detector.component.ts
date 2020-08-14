@@ -131,7 +131,7 @@ export class DetectorComponent implements OnInit, OnChanges {
     }
 
     fetchModelList() {
-        this.http.get(`${this.BASE_URL}/api/list/model`).subscribe(
+        this.http.get(`${this.BASE_URL}/brain/models`).subscribe(
             (res) => {
                 this.models = (<Object>res)['files'];
 
@@ -214,7 +214,7 @@ export class DetectorComponent implements OnInit, OnChanges {
         formData.append('modelName', this.selectedModel);
 
         // predict api call
-        this.http.post<any>(`${this.BASE_URL}/api/detect/`, formData).subscribe(
+        this.http.post<any>(`${this.BASE_URL}/brain/detections`, formData).subscribe(
             (res) => {
                 this.popUpNotification(res.code, res.message);
                 // callback data
@@ -306,26 +306,26 @@ export class DetectorComponent implements OnInit, OnChanges {
                                     self.colorHash[
                                         self.prediction.names[idx][i]
                                     ];
-                                context.fillRect(
-                                    box[1] * 800 + defaultWidth,
-                                    box[0] * 800 + defaultHeight,
-                                    800 * (box[3] - box[1]),
-                                    800 * (box[2] - box[0])
-                                );
+                                // context.fillRect(
+                                //     box[1] * 800 + defaultWidth,
+                                //     box[0] * 800 + defaultHeight,
+                                //     800 * (box[3] - box[1]),
+                                //     800 * (box[2] - box[0])
+                                // );
                                 context.font = '15px Arial';
                                 context.fillStyle = 'white';
                                 context.fillText(
                                     self.prediction.names[idx][i],
-                                    box[1] * 800 + defaultWidth,
-                                    box[0] * 800 + defaultHeight - 5,
-                                    box[0] * 800 + defaultHeight
+                                    box[0]-box[2]/2 + defaultWidth,
+                                    box[1]-box[3]/2 + defaultHeight - 5
                                 );
                                 context.lineWidth = 2.5;
                                 context.strokeRect(
-                                    box[1] * 800 + defaultWidth,
-                                    box[0] * 800 + defaultHeight,
-                                    800 * (box[3] - box[1]),
-                                    800 * (box[2] - box[0])
+                                    box[0]-box[2]/2  + defaultWidth,
+                                    box[1]-box[3]/2 + defaultHeight,
+                                    box[2],
+                                    box[3]
+                                
                                 );
 
                                 // @
@@ -333,10 +333,10 @@ export class DetectorComponent implements OnInit, OnChanges {
                                 // @
                                 self.dataForAnnotator.push({
                                     name: self.prediction.names[idx][i],
-                                    x: box[1] * 800 + defaultWidth,
-                                    y: box[0] * 800 + defaultHeight,
-                                    w: 800 * (box[3] - box[1]),
-                                    h: 800 * (box[2] - box[0]),
+                                    x: box[0]-box[2]/2 + defaultWidth,
+                                    y: box[1]-box[3]/2 + defaultHeight,
+                                    w: box[2],
+                                    h: box[3],
                                     color:
                                         self.colorHash[
                                             self.prediction.names[idx][i]

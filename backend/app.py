@@ -11,12 +11,13 @@ from darknet import load_net,detect,load_meta
 import simplejson as json
 import xmltodict
 from datetime import timedelta
+import pyvips
 
 # net = load_net(b"brainmodels/basemodel/yolov3.cfg", b"brainmodels/basemodel/yolov3.weights", 0)
 # meta = load_meta(b"brainmodels/basemodel/coco.data")
 
-net = load_net(b"brainmodels/basemodel1/yolo-obj.cfg", b"brainmodels/basemodel1/yolo-obj.backup", 0)
-meta = load_meta(b"brainmodels/basemodel1/obj.data")
+net = load_net(b"brainmodels/basemodel/yolo-obj.cfg", b"brainmodels/basemodel/yolo-obj.backup", 0)
+meta = load_meta(b"brainmodels/basemodel/obj.data")
 
 app = flask.Flask(__name__, static_folder='./public')
 api = Api(app)
@@ -49,6 +50,7 @@ def get_labeled_brainimg():
 
 @app.route('/brain/detections',methods = ['POST'])
 def get_detections():
+    print("Detect image")
     image = request.files['file']
     image.save(os.path.join(os.getcwd(), "public/brain/segmented/"+ image.filename))
     image_path = bytes("public/brain/segmented/"+image.filename, encoding='utf-8')
@@ -229,6 +231,93 @@ def save_retraining_info():
             "code": 500,
             "message": "error"
         } 
+    return response
+
+
+wsl_uploads = {}
+@app.route('/brain/dzi/status',methods = ['GET'])
+def get_brain_dzi_status():
+    storagePath = os.path.join(os.getcwd(), "public/brain/wsl/")
+    fileId = request.headers.get("x-file-id")
+    fileName = request.headers.get("name")   
+    fileSize = int(request.headers["size"])
+    if fileName:
+        try:
+            foldername = re.sub(r'[^\w]', '_',fileName)
+            wsl_file = os.path.join(os.getcwd(), "public/brain/wsl/%s/%s/"%foldername%fileName)
+            if wsl_file.is_file():
+                stats = os.stat(wsl_file)          
+                print(datetime.now() + ": file size is %s"%fileSize + "and already uploaded file size %s"%stats.st_size)
+                if fileSize == stats.st_size:
+                    print(datetime.now()+ "%s exists on server, start retrieving file"%fileName)
+                if not wsl_uploads.has_key(fileId):
+                    wsl_uploads[fileId] = {}
+                wsl_uploads[fileId]["bytesReceived"] = stats.st_size; 
+                print(datetime.now()+"uploaded amount is %s"%stats.size)
+        except:
+            print("error")
+
+
+    if fileId not in wsl_uploads:
+        wsl_uploads[fileId] = {}
+
+    upload = wsl_uploads[fileId]
+    if upload:
+        response = { "uploaded": upload.bytesReceived }
+    else:
+        response = { "uploaded": 0}
+    print(response)
+
+    return response
+
+
+@app.route('/brain/dzi/upload', methods = ['POST'])
+def upload_brainwsl():
+    fileName = request.headers["name"]
+    # foldername = re.sub(r'[^\w]', '_',fileName)
+    foldername = fileName
+
+    uploadPath = os.path.join(os.getcwd(), "public/brain/wsl/%s/"%foldername)
+    if not os.path.exists(uploadPath):
+        os.makedirs(uploadPath)
+
+    fileFullPath = os.path.join(uploadPath, fileName)
+    
+    with open(fileFullPath, "wb") as f:
+        chunk_size = 4096
+        while True:
+            chunk = request.stream.read(chunk_size)
+            if len(chunk) == 0:
+                break
+            f.write(chunk)
+
+    savePath = os.path.join(uploadPath, "output")
+    if not os.path.exists(savePath):
+        os.makedirs(savePath)
+
+    img = pyvips.Image.new_from_file(fileFullPath, access='sequential')
+    img.dzsave(savePath+"/%s"%fileName, overlap=0, tile_size=800)
+
+
+    with open(savePath + "/%s.dzi"%fileName) as xml_file:       
+        data_dict = xmltodict.parse(xml_file.read()) 
+        print(data_dict)
+        Format = data_dict['Image']['@Format']
+        Overlap = data_dict['Image']['@Overlap']
+        TileSize = data_dict['Image']['@TileSize']
+        Width = data_dict['Image']['Size']['@Width']
+        Height = data_dict['Image']['Size']['@Height']
+
+        xml_file.close() 
+
+    response = {
+        "Format": Format,
+        "Overlap": Overlap,
+        "TileSize":TileSize,
+        "Width": Width,
+        "Height":Height
+    }  
+ 
     return response
 
 

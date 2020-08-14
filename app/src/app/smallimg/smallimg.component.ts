@@ -39,7 +39,7 @@ export class SmallimgComponent implements OnInit {
         this.isImageSelected = false;
         // create file object
         const value = event.target.value;
-        let response = await fetch(`${this.BASE_URL}/uploads/${value}`);
+        let response = await fetch(`${this.BASE_URL}/public/brain/segmented/${value}`);
         let data = await response.blob();
         let metadata = {
             type: 'image/jpeg',
@@ -76,7 +76,7 @@ export class SmallimgComponent implements OnInit {
     }
 
     fetchImagesList() {
-        this.http.get(`${this.BASE_URL}/api/list/segmented`).subscribe(
+        this.http.get(`${this.BASE_URL}/brain/segmented`).subscribe(
             (res) => {
                 this.samples = (<Object>res)['files'];
             },
