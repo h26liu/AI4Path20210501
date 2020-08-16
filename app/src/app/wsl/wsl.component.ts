@@ -210,9 +210,11 @@ export class WslComponent {
                 if (res.status === 'file is present') {
                     this._spinner.hide();
 
-                    let folderName = this.imageName.replace(/\s+/g, '_');
+                    // let folderName = this.imageName.replace(/\s+/g, '_');
+                    let folderName = this.imageName;
 
-                    let resData = JSON.parse(res.data);
+                    // let resData = JSON.parse(res.data);
+                    let resData = res.data;
 
                     this.dziData = {
                         Url: `${this.BASE_URL}/public/brain/wsl/${folderName}/output/${this.imageName}_files/`,
