@@ -122,6 +122,17 @@ def retrieve_data():
 @app.route('/brain/detectwsl/',methods = ['POST'])
 def get_wsl_detections():
     fileName = request.get_json()["name"]
+
+    # check if detection result exists
+    if (os.path.exists('./public/brain/wsl/detections/' + fileName + '.json')):
+    
+        with open('./public/brain/wsl/detections/' + fileName + '.json') as json_file:       
+            response = json_file.read()
+
+        json_file.close() 
+
+        return response
+
     path = "public/brain/wsl/%s/output/%s_files"%(fileName,fileName)
     tiles = os.listdir(path)
     tiles_list = list(map(int,tiles))
