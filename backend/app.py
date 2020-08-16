@@ -137,7 +137,7 @@ def get_wsl_detections():
         res = {}
         res['name'] = tile
         tile_path = bytes(sub_path+'/'+tile, encoding='utf-8')
-        # print(tile_path)
+        print(tile_path)
         r = detect(net,meta, tile_path)
         res['detections'] = r
         detection_results.append(res)
@@ -237,23 +237,83 @@ def save_retraining_info():
 wsl_uploads = {}
 @app.route('/brain/dzi/status',methods = ['GET'])
 def get_brain_dzi_status():
-    storagePath = os.path.join(os.getcwd(), "public/brain/wsl/")
+    # storagePath = os.path.join(os.getcwd(), "public/brain/wsl/")
+    storagePath = os.path.join("./public/brain/wsl/")
     fileId = request.headers.get("x-file-id")
     fileName = request.headers.get("name")   
     fileSize = int(request.headers["size"])
+
+    if (os.path.exists('./public/brain/wsl/' + fileName + '/output/' + fileName + '.dzi')):
+        print("%s exists on server, start retrieving file"%fileName)
+
+        with open("./public/brain/wsl/%s/"%fileName + "/output/%s.dzi"%fileName) as xml_file:       
+            data_dict = xmltodict.parse(xml_file.read()) 
+            print(data_dict)
+            Format = data_dict['Image']['@Format']
+            Overlap = data_dict['Image']['@Overlap']
+            TileSize = data_dict['Image']['@TileSize']
+            Width = data_dict['Image']['Size']['@Width']
+            Height = data_dict['Image']['Size']['@Height']
+
+        xml_file.close() 
+
+        response = {
+            'status': 'file is present',
+            'data': {
+                "Format": Format,
+                "Overlap": Overlap,
+                "TileSize":TileSize,
+                "Width": Width,
+                "Height":Height
+            }
+        }
+
+        return response
+
     if fileName:
         try:
-            foldername = re.sub(r'[^\w]', '_',fileName)
-            wsl_file = os.path.join(os.getcwd(), "public/brain/wsl/%s/%s/"%foldername%fileName)
+            foldername = fileName
+            # wsl_file = os.path.join(os.getcwd(), "public/brain/wsl/%s/%s/"%foldername%fileName)
+            wsl_file = os.path.join("./public/brain/wsl/%s/%s"%foldername%fileName)
+            
             if wsl_file.is_file():
                 stats = os.stat(wsl_file)          
                 print(datetime.now() + ": file size is %s"%fileSize + "and already uploaded file size %s"%stats.st_size)
-                if fileSize == stats.st_size:
-                    print(datetime.now()+ "%s exists on server, start retrieving file"%fileName)
+                
+                # if fileSize == stats.st_size:
+                #     print(datetime.now()+ "%s exists on server, start retrieving file"%fileName)
+                
+                #     with open("public/brain/wsl/%s/"%foldername + "/output/%s.dzi"%fileName) as xml_file:       
+                #         data_dict = xmltodict.parse(xml_file.read()) 
+                #         print(data_dict)
+                #         Format = data_dict['Image']['@Format']
+                #         Overlap = data_dict['Image']['@Overlap']
+                #         TileSize = data_dict['Image']['@TileSize']
+                #         Width = data_dict['Image']['Size']['@Width']
+                #         Height = data_dict['Image']['Size']['@Height']
+
+                #         xml_file.close() 
+
+                #     response = {
+                #         status: 'file is present',
+                #         data: {
+                #             "Format": Format,
+                #             "Overlap": Overlap,
+                #             "TileSize":TileSize,
+                #             "Width": Width,
+                #             "Height":Height
+                #         }
+                #     }
+
+                #     return response
+
                 if not wsl_uploads.has_key(fileId):
                     wsl_uploads[fileId] = {}
+                
                 wsl_uploads[fileId]["bytesReceived"] = stats.st_size; 
                 print(datetime.now()+"uploaded amount is %s"%stats.size)
+            else:
+                print('NOT A FILE')
         except:
             print("error")
 

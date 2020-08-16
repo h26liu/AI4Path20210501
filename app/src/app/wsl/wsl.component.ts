@@ -587,6 +587,7 @@ export class WslComponent {
     addOverlay() {
         let wsiPrediction = this.wslprediction;
         for (let i = 0; i < wsiPrediction.length; i++) {
+            console.log(i)
             var name = wsiPrediction[i].name;
             var detections = wsiPrediction[i].detections;
 
@@ -669,6 +670,7 @@ export class WslComponent {
 
         this._spinner.show();
         this.systemMsg = 'retriving wsi detection results from server';
+        console.log(this.selectedSample)
 
         this.http
             .post<any>(`${this.BASE_URL}/brain/detectwsl/`, {
@@ -676,7 +678,9 @@ export class WslComponent {
             })
             .subscribe(
                 (res) => {
+                    
                     this.wslprediction = res.all_detections;
+                    console.log(this.wslprediction)
                     this.isImageDetected = true;
                     this.retrivingDetection = false;
 
