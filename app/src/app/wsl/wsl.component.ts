@@ -210,9 +210,11 @@ export class WslComponent {
                 if (res.status === 'file is present') {
                     this._spinner.hide();
 
-                    let folderName = this.imageName.replace(/\s+/g, '_');
+                    // let folderName = this.imageName.replace(/\s+/g, '_');
+                    let folderName = this.imageName;
 
-                    let resData = JSON.parse(res.data);
+                    // let resData = JSON.parse(res.data);
+                    let resData = res.data;
 
                     this.dziData = {
                         Url: `${this.BASE_URL}/public/brain/wsl/${folderName}/output/${this.imageName}_files/`,
@@ -375,7 +377,7 @@ export class WslComponent {
             self.minImagePoint = originImagePoint;
             self.maxImagePoint = maxImagePoint;
 
-            if (self.isImageDetected) {
+            if (self.isImageDetected && self.getZoomFactor() > 10.0) {
                 self.addOverlay();
             }
         });
@@ -551,7 +553,6 @@ export class WslComponent {
     }
 
     onImageViewChange(event) {
-        this.zoomFactor = event.zoomFactor;
         if (document.getElementById('zoomfactorSpan') !== null) {
             // set zoom factor value to display
             (document.getElementById(
@@ -585,6 +586,8 @@ export class WslComponent {
     }
 
     addOverlay() {
+        console.log(this.zoomFactor * 40);
+
         let wsiPrediction = this.wslprediction;
         for (let i = 0; i < wsiPrediction.length; i++) {
             console.log(i)
@@ -665,6 +668,19 @@ export class WslComponent {
         }
     }
 
+    getZoomFactor() {
+        let zoomFactor = '1';
+        if (document.getElementById('zoomfactorSpan') !== null) {
+            // set zoom factor value to display
+            let zoomFactorSpan = (document.getElementById(
+                'zoomfactorSpan'
+            ) as HTMLImageElement).textContent;
+            zoomFactor = zoomFactorSpan.replace(/^\D+/g, '');
+        }
+
+        return parseFloat(zoomFactor);
+    }
+
     onDetectClick() {
         this.retrivingDetection = true;
 
@@ -684,7 +700,7 @@ export class WslComponent {
                     this.isImageDetected = true;
                     this.retrivingDetection = false;
 
-                    this.addOverlay();
+                    // this.addOverlay();
 
                     this._spinner.hide();
                     this._notifications.success(
