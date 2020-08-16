@@ -289,6 +289,10 @@ export class WslComponent {
                                     200,
                                     'whole slide image successfully transformed to dzi image'
                                 );
+
+                                this.fetchImagesList();
+                                this.selectedSample = this.imageName;
+
                                 this.systemMsg = '';
                                 this._spinner.hide();
                             }
@@ -377,7 +381,7 @@ export class WslComponent {
             self.minImagePoint = originImagePoint;
             self.maxImagePoint = maxImagePoint;
 
-            if (self.isImageDetected && self.getZoomFactor() > 10.0) {
+            if (self.isImageDetected && self.getZoomFactor() >= 10.0) {
                 self.addOverlay();
             }
         });
@@ -590,7 +594,6 @@ export class WslComponent {
 
         let wsiPrediction = this.wslprediction;
         for (let i = 0; i < wsiPrediction.length; i++) {
-            console.log(i)
             var name = wsiPrediction[i].name;
             var detections = wsiPrediction[i].detections;
 
@@ -686,7 +689,6 @@ export class WslComponent {
 
         this._spinner.show();
         this.systemMsg = 'retriving wsi detection results from server';
-        console.log(this.selectedSample)
 
         this.http
             .post<any>(`${this.BASE_URL}/brain/detectwsl/`, {
@@ -694,9 +696,7 @@ export class WslComponent {
             })
             .subscribe(
                 (res) => {
-                    
                     this.wslprediction = res.all_detections;
-                    console.log(this.wslprediction)
                     this.isImageDetected = true;
                     this.retrivingDetection = false;
 
