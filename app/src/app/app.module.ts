@@ -36,6 +36,7 @@ import { MitosisComponent } from './mitosis/mitosis.component';
 import { MitosisSegmentedComponent } from './mitosis-segmented/mitosis-segmented.component';
 import { MitosisWslComponent } from './mitosis-wsl/mitosis-wsl.component';
 import { MitosisdetectorComponent } from './mitosisdetector/mitosisdetector.component';
+import { WholeslideComponent } from './wholeslide/wholeslide.component';
 
 @NgModule({
     declarations: [
@@ -53,6 +54,7 @@ import { MitosisdetectorComponent } from './mitosisdetector/mitosisdetector.comp
         MitosisSegmentedComponent,
         MitosisWslComponent,
         MitosisdetectorComponent,
+        WholeslideComponent,
     ],
     imports: [
         BrowserModule,

@@ -135,8 +135,8 @@ export class WslComponent {
             })
             .subscribe(
                 (res: any) => {
-                    let folderName = this.selectedSample.replace(/\s+/g, '_');
-
+                    // let folderName = this.selectedSample.replace(/\s+/g, '_');
+                    let folderName = this.selectedSample
                     this.dziData = {
                         Url: `${this.BASE_URL}/public/brain/wsl/${folderName}/output/${this.selectedSample}_files/`,
                         Format: res.Format,
@@ -267,10 +267,11 @@ export class WslComponent {
                             }
                         } else {
                             if ('body' in res) {
-                                let folderName = this.imageName.replace(
-                                    /\s+/g,
-                                    '_'
-                                );
+                                // let folderName = this.imageName.replace(
+                                //     /\s+/g,
+                                //     '_'
+                                // );
+                                let folderName = this.imageName
 
                                 this.dziData = {
                                     Url: `${this.BASE_URL}/public/brain/wsl/${folderName}/output/${this.imageName}_files/`,

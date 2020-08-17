@@ -64,13 +64,7 @@
                     </option>
                 </select>
             </div>
-            <!-- <button
-                type="button"
-                class="btn btn-sm btn-outline-primary px-3 ml-2"
-                (click)="onDetectClick()"
-            >
-                Detect
-            </button> -->
+
         </div>
         <small class="mr-3 mt-2 text-muted">
             Whole Slide Brain Cell Image Detector
@@ -134,7 +128,7 @@
                 <button id="full-screen" class="btn osd-nav-btn">
                     <fa-icon [icon]="faExpandArrowsAlt"></fa-icon>
                 </button>
-                <button
+                <!-- <button
                     (mouseover)="hover = true"
                     (mouseleave)="hover = false"
                     [ngStyle]="{ color: hover ? 'gray' : selectBtnColor }"
@@ -142,7 +136,7 @@
                     (click)="toggleRegionSelection()"
                 >
                     <fa-icon [icon]="faCut"></fa-icon>
-                </button>
+                </button>  -->
                 <button class="btn osd-nav-btn" (click)="setZoomLevel(2)">
                     <span class="zoom-level-txt">
                         2x
@@ -152,40 +146,31 @@
                     <span class="zoom-level-txt">
                         4x
                     </span>
-                </button>
-                <button
-                    class="btn osd-nav-btn zoom-level-btn"
-                    (click)="setZoomLevel(5)"
-                >
+                </button> 
+                <button class="btn osd-nav-btn zoom-level-btn" (click)="setZoomLevel(5)">
                     <span class="zoom-level-txt">
                         5x
                     </span>
                 </button>
-                <button
-                    class="btn osd-nav-btn zoom-level-btn"
-                    (click)="setZoomLevel(10)"
+                <button class="btn osd-nav-btn zoom-level-btn" (click)="setZoomLevel(10)"
                 >
                     <span class="zoom-level-txt">
                         10x
                     </span>
                 </button>
-                <button
-                    class="btn osd-nav-btn zoom-level-btn"
-                    (click)="setZoomLevel(20)"
+                <button class="btn osd-nav-btn zoom-level-btn" (click)="setZoomLevel(20)"
                 >
                     <span class="zoom-level-txt">
                         20x
                     </span>
                 </button>
-                <button
-                    class="btn osd-nav-btn zoom-level-btn"
-                    (click)="setZoomLevel(40)"
+                <button class="btn osd-nav-btn zoom-level-btn" (click)="setZoomLevel(40)"
                 >
                     <span class="zoom-level-txt">
                         40x
                     </span>
                 </button>
-            </nav>
+            </nav> 
             <div
                 [hidden]="!isImageLoaded"
                 id="osdviewer"
@@ -193,15 +178,12 @@
             ></div>
         </div>
     </div>
-    <div class="row ml-2 mr-2 pb-1 justify-content-end">
+    <!-- <div class="row ml-2 mr-2 pb-1 justify-content-end">
         <button class="btn btn-sm btn-link or-btn" disabled>
             <span id="zoomfactorSpan">zoom level: n/a</span>
         </button>
-    </div>
-    <!-- <app-detector
-        *ngIf="isRegionSelected"
-        [imageSrc]="selectedRegion"
-    ></app-detector> -->
+    </div> -->
+ 
 </div>
 <!-- ------------------------------------------ -->
 <!--      Image Upload Confirm Modal            -->

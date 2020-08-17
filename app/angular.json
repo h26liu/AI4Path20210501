@@ -33,7 +33,9 @@
                             "node_modules/bootstrap/dist/js/bootstrap.js",
                             "./src/assets/openseadragon/openseadragon.js",
                             "./src/assets/openseadragonselection/dist/openseadragonselection.js",
-                            "./src/assets/imaginghelper.js"
+                            "./src/assets/imaginghelper.js",
+                            "./src/assets/openseadragon-fabricjs-overlay.js",
+                            "./src/assets/fabric/fabric.adapted.js"
                         ]
                     },
                     "configurations": {

@@ -218,7 +218,7 @@ export class DetectorComponent implements OnInit, OnChanges {
             (res) => {
                 this.popUpNotification(res.code, res.message);
                 // callback data
-                this.prediction = res.prediction;
+                this.prediction = res.prediction.detections;
                 // processing res data
                 // and generate rects
                 this.drawOnCanvas();
@@ -259,63 +259,43 @@ export class DetectorComponent implements OnInit, OnChanges {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(img, 0, 0, this.width, this.height);
 
-                const row = Math.ceil(img.height / 800);
-                const column = Math.ceil(img.width / 800);
-                const nums =
-                    Math.ceil(img.height / 800) * Math.ceil(img.width / 800);
+                for(let i = 0; i< self.prediction.length; i++){
+                    // console.log(self.prediction)
+                    // console.log(self.prediction.name)
+                    var name1 = self.prediction[i].name.split(".")
+                    var res= name1[0].split("_")
+                    let defaultWidth = 800* Number(res[1])
+                    let defaultHeight = 800*Number(res[0])
+                    for (let j=0; j< self.prediction[i].detections.length; j++){
+                        
+                        const confidence = self.prediction[i].detections[j][1]
+                        if (confidence > self.threshold){
 
-                for (let idx = 0; idx < nums; idx++) {
-                    let defaultWidth = 800 * Math.floor(idx / row);
-                    let defaultHeight = 800 * (idx % row);
-                    for (
-                        let i = 0;
-                        i < self.prediction.boxes[idx].length;
-                        i++
-                    ) {
-                        if (self.prediction.scores[idx][i] > self.threshold) {
-                            const box = self.prediction.boxes[idx][i];
+                            const box = self.prediction[i].detections[j][2]
+                            let cellname = self.prediction[i].detections[j][0]
                             if (!self.labelClicked) {
                                 // only reload related data on initial loading or when threshold adjusted
-                                if (
-                                    self.labels.indexOf(
-                                        self.prediction.names[idx][i]
-                                    ) === -1
-                                ) {
-                                    self.labels.push(
-                                        self.prediction.names[idx][i]
-                                    );
+                                if (self.labels.indexOf(cellname) === -1) {
+                                    self.labels.push(cellname);
                                     Object.assign(self.labelsCount, {
-                                        [self.prediction.names[idx][i]]: 1,
+                                        [cellname]: 1,
                                     });
                                     Object.assign(self.labelsTxtStyle, {
-                                        [self.prediction.names[idx][i]]: 'none',
+                                        [cellname]: 'none',
                                     });
                                 } else {
-                                    self.labelsCount[
-                                        self.prediction.names[idx][i]
-                                    ] += 1;
+                                    self.labelsCount[cellname] += 1;
                                 }
                             }
-                            if (
-                                self.labelsTxtStyle[
-                                    self.prediction.names[idx][i]
-                                ] === 'none'
-                            ) {
+
+                            if (self.labelsTxtStyle[cellname] === 'none') 
+                               {
                                 context.fillStyle = 'rgba(255,255,255,0.2)';
-                                context.strokeStyle =
-                                    self.colorHash[
-                                        self.prediction.names[idx][i]
-                                    ];
-                                // context.fillRect(
-                                //     box[1] * 800 + defaultWidth,
-                                //     box[0] * 800 + defaultHeight,
-                                //     800 * (box[3] - box[1]),
-                                //     800 * (box[2] - box[0])
-                                // );
+                                context.strokeStyle = self.colorHash[cellname];
                                 context.font = '15px Arial';
                                 context.fillStyle = 'white';
                                 context.fillText(
-                                    self.prediction.names[idx][i],
+                                    cellname,
                                     box[0]-box[2]/2 + defaultWidth,
                                     box[1]-box[3]/2 + defaultHeight - 5
                                 );
@@ -332,24 +312,21 @@ export class DetectorComponent implements OnInit, OnChanges {
                                 // process data list for annotator
                                 // @
                                 self.dataForAnnotator.push({
-                                    name: self.prediction.names[idx][i],
+                                    name: cellname,
                                     x: box[0]-box[2]/2 + defaultWidth,
                                     y: box[1]-box[3]/2 + defaultHeight,
                                     w: box[2],
                                     h: box[3],
-                                    color:
-                                        self.colorHash[
-                                            self.prediction.names[idx][i]
-                                        ],
+                                    color: self.colorHash[cellname],
                                 });
                             }
                         }
                     }
-                }
 
+            }
+           
                 // display detected image on osd
                 self.setOsdObject(canvas.toDataURL());
-
                 self.labelClicked = false;
             });
             img.src = <string>event.target.result;

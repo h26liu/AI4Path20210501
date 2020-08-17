@@ -12,12 +12,17 @@ import simplejson as json
 import xmltodict
 from datetime import timedelta
 import pyvips
+from PIL import Image
+import math
 
 # net = load_net(b"brainmodels/basemodel/yolov3.cfg", b"brainmodels/basemodel/yolov3.weights", 0)
 # meta = load_meta(b"brainmodels/basemodel/coco.data")
 
-net = load_net(b"brainmodels/basemodel/yolo-obj.cfg", b"brainmodels/basemodel/yolo-obj.backup", 0)
-meta = load_meta(b"brainmodels/basemodel/obj.data")
+# net = load_net(b"brainmodels/basemodel/yolo-obj.cfg", b"brainmodels/basemodel/yolo-obj.backup", 0)
+# meta = load_meta(b"brainmodels/basemodel/obj.data")
+
+net = load_net(b"brainmodels/basemodel_0816/yolov3_custom.cfg", b"brainmodels/basemodel_0816/yolov3_custom_pathology_best.weights", 0)
+meta = load_meta(b"brainmodels/basemodel_0816/detector.data")
 
 app = flask.Flask(__name__, static_folder='./public')
 api = Api(app)
@@ -53,34 +58,35 @@ def get_detections():
     print("Detect image")
     image = request.files['file']
     image.save(os.path.join(os.getcwd(), "public/brain/segmented/"+ image.filename))
-    image_path = bytes("public/brain/segmented/"+image.filename, encoding='utf-8')
-    r = detect(net,meta, image_path)
-   
-    detectedScores = []
-    detectedBoxes = []
-    detectedNames = []
+    # image_path = bytes("public/brain/segmented/"+image.filename, encoding='utf-8')
+    # im = Image.open(image_path)
+    img = Image.open("public/brain/segmented/"+image.filename)
+    column = math.ceil(img.size[0]/800)
+    row = math.ceil(img.size[1]/800)
+    new_image = Image.new('RGB', (800*column,800*row), (128, 128, 128)) 
+    new_image.paste(img, (0, 0)) 
 
-    eachBoxes = []
-    eachNames = []
-    eachScores = []
-
-    for i in range(len(r)):
-        eachScores.append(r[i][1])
-        eachBoxes.append(r[i][2])
-        eachNames.append(r[i][0].decode())
-
-    detectedScores.append(eachScores)
-    detectedBoxes.append(eachBoxes)
-    detectedNames.append(eachNames)
-
+    detection_results = []
+    for i in range(row):
+        for j in range(column):
+            res = {}
+            res['name'] = "%d_%d.jpg"%(i,j)     
+            box = (j*800, i*800, j*800+800, i*800+800)
+            tile = new_image.crop(box)
+            tile.save("public/brain/cropped/%s_%d_%d.jpg"%(image.filename,i,j))
+            path = bytes("public/brain/cropped/%s_%d_%d.jpg"%(image.filename,i,j), encoding='utf-8')
+            r = detect(net,meta, path)
+            res['detections'] = r
+            detection_results.append(res)
+            os.remove(path)
+    
     response = {
         "code":200,
         "message": "prediction result retrived",
         "prediction": {
-            "scores": detectedScores,
-            "boxes": detectedBoxes,
-            "names": detectedNames 
-        }
+            "name": image.filename,
+            "detections":detection_results
+        } 
     }
 
     print(response)
@@ -124,9 +130,9 @@ def get_wsl_detections():
     fileName = request.get_json()["name"]
 
     # check if detection result exists
-    if (os.path.exists('./public/brain/wsl/detections/' + fileName + '.json')):
+    if (os.path.exists('./public/brain/wsldetections/' + fileName + '.json')):
     
-        with open('./public/brain/wsl/detections/' + fileName + '.json') as json_file:       
+        with open('./public/brain/wsldetections/' + fileName + '.json') as json_file:       
             response = json_file.read()
 
         json_file.close() 
@@ -152,27 +158,6 @@ def get_wsl_detections():
         r = detect(net,meta, tile_path)
         res['detections'] = r
         detection_results.append(res)
-        # image = cv2.imread(sub_path+'/'+tile)
-        # for detection in r:
-            
-            # width = detection[2][2]
-            # height = detection[2][3]
-            # if int(width) < 800 and int(height) < 800:
-                
-            #     center_x = detection[2][0]
-            #     center_y = detection[2][1]
-            #     bottomLeft_x = int(center_x - (width / 2))
-            #     bottomLeft_y = int(center_y - (height / 2))
-            #     width = int(width)
-            #     height = int(height)
-            #     # print(color[str(detection[0].decode())])
-            #     cv2.rectangle(image,(bottomLeft_x, bottomLeft_y), (bottomLeft_x+width, bottomLeft_y+ height), color[str(detection[0].decode())],2)
-            #     cv2.putText(image, str(detection[0].decode()),(bottomLeft_x, bottomLeft_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (225, 225, 225), 2) 
-            # else:
-            #     print(width,height)
-        # path = sub_path+'/'+tile
-        # cv2.imwrite(path,image)
-
 
 
     response = {
@@ -181,7 +166,7 @@ def get_wsl_detections():
     }
 
     json_data = json.dumps(response)           
-    with open("public/brain/wsl/detections/" + fileName + '.json', "w",encoding='utf-8') as json_file:
+    with open("public/brain/wsldetections/" + fileName + '.json', "w",encoding='utf-8') as json_file:
         json_file.write(json_data)
         json_file.close()
 
@@ -390,10 +375,6 @@ def upload_brainwsl():
     }  
  
     return response
-
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='129.100.20.37', port = 8080)

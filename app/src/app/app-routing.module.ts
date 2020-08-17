@@ -11,6 +11,7 @@ import { Ki67detectorComponent } from './ki67detector/ki67detector.component';
 import { MitosisSegmentedComponent } from './mitosis-segmented/mitosis-segmented.component';
 import { MitosisWslComponent } from './mitosis-wsl/mitosis-wsl.component';
 import { MitosisComponent } from './mitosis/mitosis.component';
+import { WholeslideComponent } from './wholeslide/wholeslide.component';
 
 const routes: Routes = [
     {
@@ -24,6 +25,10 @@ const routes: Routes = [
     {
         path: 'braincell/wsl',
         component: WslComponent,
+    },
+    {
+        path: 'braincell/wholeslide',
+        component: WholeslideComponent,
     },
     {
         path: 'annotator',
