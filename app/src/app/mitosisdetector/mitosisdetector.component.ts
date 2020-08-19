@@ -141,8 +141,7 @@ export class MitosisdetectorComponent implements OnInit {
                 self._spinner.hide();
                 self.popUpNotification(200, `${self.imageName} loaded`);
 
-                // context.clearRect(0, 0, canvas.width, canvas.height);
-                // context.drawImage(img, 0, 0, this.width, this.height);
+                
             });
             img.src = <string>event.target.result;
         };
@@ -183,7 +182,7 @@ export class MitosisdetectorComponent implements OnInit {
 
         // predict api call
         this.http
-            .post<any>(`${this.BASE_URL}/api/detect/mitosis`, formData)
+            .post<any>(`${this.BASE_URL}/mitosis/detections`, formData)
             .subscribe(
                 (res) => {
                     this.popUpNotification(res.code, res.message);
@@ -230,88 +229,60 @@ export class MitosisdetectorComponent implements OnInit {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(img, 0, 0, this.width, this.height);
 
-                const row = Math.ceil(img.height / 800);
-                const column = Math.ceil(img.width / 800);
-                const nums =
-                    Math.ceil(img.height / 800) * Math.ceil(img.width / 800);
-
-                for (let idx = 0; idx < nums; idx++) {
-                    let defaultWidth = 800 * Math.floor(idx / row);
-                    let defaultHeight = 800 * (idx % row);
-                    for (
-                        let i = 0;
-                        i < self.prediction.boxes[idx].length;
-                        i++
-                    ) {
-                        if (self.prediction.scores[idx][i] > self.threshold) {
-                            const box = self.prediction.boxes[idx][i];
+                for (let i = 0; i < self.prediction.length; i++) {
+                    var name1 = self.prediction[i].name.split(".")
+                    var res= name1[0].split("_")
+                    let defaultWidth = 800* Number(res[1])
+                    let defaultHeight = 800*Number(res[0])
+     
+                    for (let j = 0;j < self.prediction[i].detections.length; j++)            
+                    {
+                        const confidence = self.prediction[i].detections[j][1]
+                        if (confidence > self.threshold) {
+                            const box = self.prediction[i].detections[j][2]
+                            let cellname = self.prediction[i].detections[j][0]
                             if (!self.labelClicked) {
                                 // only reload related data on initial loading or when threshold adjusted
-                                if (
-                                    self.labels.indexOf(
-                                        self.prediction.names[idx][i]
-                                    ) === -1
-                                ) {
-                                    self.labels.push(
-                                        self.prediction.names[idx][i]
-                                    );
+                                if (self.labels.indexOf(cellname)=== -1){ 
+                                    self.labels.push(cellname);            
                                     Object.assign(self.labelsCount, {
-                                        [self.prediction.names[idx][i]]: 1,
+                                        [cellname]: 1,
                                     });
                                     Object.assign(self.labelsTxtStyle, {
-                                        [self.prediction.names[idx][i]]: 'none',
+                                        [cellname]: 'none',
                                     });
                                 } else {
-                                    self.labelsCount[
-                                        self.prediction.names[idx][i]
-                                    ] += 1;
+                                    self.labelsCount[cellname] += 1;                          
                                 }
                             }
-                            if (
-                                self.labelsTxtStyle[
-                                    self.prediction.names[idx][i]
-                                ] === 'none'
-                            ) {
+                            if (self.labelsTxtStyle[cellname] === 'none') {
                                 context.fillStyle = 'rgba(255,255,255,0.2)';
-                                context.strokeStyle =
-                                    self.colorHash[
-                                        self.prediction.names[idx][i]
-                                    ];
-                                context.fillRect(
-                                    box[1] * 800 + defaultWidth,
-                                    box[0] * 800 + defaultHeight,
-                                    800 * (box[3] - box[1]),
-                                    800 * (box[2] - box[0])
-                                );
+                                context.strokeStyle =self.colorHash[cellname];
                                 context.font = '15px Arial';
                                 context.fillStyle = 'white';
                                 context.fillText(
-                                    self.prediction.names[idx][i],
-                                    box[1] * 800 + defaultWidth,
-                                    box[0] * 800 + defaultHeight - 5,
-                                    box[0] * 800 + defaultHeight
+                                    cellname,
+                                    box[0]-box[2]/2 + defaultWidth,
+                                    box[1]-box[3]/2 + defaultHeight - 5
                                 );
                                 context.lineWidth = 2.5;
                                 context.strokeRect(
-                                    box[1] * 800 + defaultWidth,
-                                    box[0] * 800 + defaultHeight,
-                                    800 * (box[3] - box[1]),
-                                    800 * (box[2] - box[0])
+                                    box[0]-box[2]/2  + defaultWidth,
+                                    box[1]-box[3]/2 + defaultHeight,
+                                    box[2],
+                                    box[3]
                                 );
 
                                 // @
                                 // process data list for annotator
                                 // @
                                 self.dataForAnnotator.push({
-                                    name: self.prediction.names[idx][i],
-                                    x: box[1] * 800 + defaultWidth,
-                                    y: box[0] * 800 + defaultHeight,
-                                    w: 800 * (box[3] - box[1]),
-                                    h: 800 * (box[2] - box[0]),
-                                    color:
-                                        self.colorHash[
-                                            self.prediction.names[idx][i]
-                                        ],
+                                    name: cellname,
+                                    x: box[0]-box[2]/2 + defaultWidth,
+                                    y: box[1]-box[3]/2 + defaultHeight,
+                                    w: box[2],
+                                    h: box[3],
+                                    color: self.colorHash[cellname],
                                 });
                             }
                         }

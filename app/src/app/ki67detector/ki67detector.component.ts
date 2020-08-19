@@ -88,7 +88,7 @@ export class Ki67detectorComponent implements OnInit {
 
         const value = event.target.value;
 
-        let response = await fetch(`${this.BASE_URL}/ki67/original/${value}`);
+        let response = await fetch(`${this.BASE_URL}/ki67/${value}`);
         let data = await response.blob();
         let metadata = {
             type: 'image/jpeg',
@@ -102,7 +102,7 @@ export class Ki67detectorComponent implements OnInit {
     }
 
     fetchImagesList() {
-        this.http.get(`${this.BASE_URL}/api/list/ki67`).subscribe(
+        this.http.get(`${this.BASE_URL}/ki67`).subscribe(
             (res) => {
                 this.samples = (<Object>res)['files'];
 
@@ -126,7 +126,7 @@ export class Ki67detectorComponent implements OnInit {
         formData.append('file', self.selectedImage);
 
         this.http
-            .post<any>(`${this.BASE_URL}/api/detect/ki67`, formData)
+            .post<any>(`${this.BASE_URL}/ki67/detections`, formData)
             .subscribe(
                 async (res) => {
                     if (res.code == 200) {

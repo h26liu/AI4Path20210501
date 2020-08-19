@@ -32,7 +32,7 @@ export class MitosisSegmentedComponent implements OnInit {
         this.isImageSelected = false;
         // create file object
         const value = event.target.value;
-        let response = await fetch(`${this.BASE_URL}/mitosis/${value}`);
+        let response = await fetch(`${this.BASE_URL}/public/mitosis/segmented/${value}`);
         let data = await response.blob();
         let metadata = {
             type: 'image/jpeg',
@@ -69,7 +69,7 @@ export class MitosisSegmentedComponent implements OnInit {
     }
 
     fetchImagesList() {
-        this.http.get(`${this.BASE_URL}/api/list/mitosis/segmented`).subscribe(
+        this.http.get(`${this.BASE_URL}/mitosis/segmented`).subscribe(
             (res) => {
                 this.samples = (<Object>res)['files'];
             },

@@ -1,0 +1,95 @@
+[hidden] {
+    display: none !important;
+}
+
+.zoom-level-txt {
+    font-size: smaller !important;
+    font-weight: bold;
+}
+
+.osd-nav-btn {
+    opacity: 0.5;
+    background-color: Black;
+
+    color: #dbdbdb;
+
+    min-width: 0 !important;
+    border: none;
+    outline: none;
+}
+
+.osd-nav-btn:hover {
+    color: gray;
+}
+
+.nav-bar-group {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#osd-navbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+
+#osdviewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.back {
+    background-color: #dbdbdb !important;
+}
+
+.or-btn {
+    min-width: 3rem !important;
+}
+
+select {
+    border-radius: 0 !important;
+    font-size: 14px !important;
+}
+
+.img-container {
+    position: relative;
+
+    width: 75% !important;
+    height: 78vh !important;
+
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.left-panel-container {
+    width: 25% !important;
+    height: 80vh !important;
+
+    overflow-y: auto;
+}
+
+.msg-container {
+    margin-top: 35vh !important;
+}
+
+.card {
+    border-radius: 0 !important;
+    font-size: 0.875rem !important;
+}
+
+.card-size {
+    width: 100% !important;
+}
+
+#red {
+    background-color: rgba(255, 0, 0, 0.5);
+}
+
+#green {
+    background-color: rgba(0, 255, 0, 0.5);
+}
+
+#blue {
+    background-color: rgba(0, 0, 255, 0.5);
+}

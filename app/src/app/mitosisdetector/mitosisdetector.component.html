@@ -115,26 +115,6 @@
                 </button>
             </div>
         </div>
-        <!-- <div [hidden]="!isLoaded" class="card card-size shadow">
-            <div class="card-header">
-                Re-Label Objects
-            </div>
-            <div class="card-body">
-                <button
-                    class="btn btn-sm btn-outline-primary btn-block"
-                    routerLink="/annotator"
-                    [state]="{ name: imageName, data: dataForAnnotator }"
-                >
-                    Modify / Add Labels
-                    <fa-icon
-                        class="ml-2"
-                        [icon]="faQuestionCircle"
-                        tooltip="If you feel like the detection result is not accurate enough, you can use this tool to re-label current image and then submit re-traning request using the advanced re-learning tool."
-                        placement="top"
-                    ></fa-icon>
-                </button>
-            </div>
-        </div> -->
     </div>
     <div class="img-container shadow">
         <div *ngIf="!isLoaded && !imageSelected" class="msg-container">
