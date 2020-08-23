@@ -18,11 +18,14 @@ import math
 # net = load_net(b"brainmodels/basemodel/yolov3.cfg", b"brainmodels/basemodel/yolov3.weights", 0)
 # meta = load_meta(b"brainmodels/basemodel/coco.data")
 
-# net = load_net(b"brainmodels/basemodel/yolo-obj.cfg", b"brainmodels/basemodel/yolo-obj.backup", 0)
-# meta = load_meta(b"brainmodels/basemodel/obj.data")
+net = load_net(b"brainmodels/basemodel/yolo-obj.cfg", b"brainmodels/basemodel/yolo-obj.backup", 0)
+meta = load_meta(b"brainmodels/basemodel/obj.data")
 
-net = load_net(b"brainmodels/basemodel_0816/yolov3_custom.cfg", b"brainmodels/basemodel_0816/yolov3_custom_pathology_best.weights", 0)
-meta = load_meta(b"brainmodels/basemodel_0816/detector.data")
+#mnet = load_net(b"mitosismodels/basemodel/yolov3_custom_mitotic.cfg", b"mitosismodels/basemodel/yolov3_custom_mitotic_best.weights", 0)
+#mmeta = load_meta(b"mitosismodels/basemodel/detector.data")
+
+#net = load_net(b"brainmodels/basemodel_0816/yolov3_custom.cfg", b"brainmodels/basemodel_0816/yolov3_custom_pathology_best.weights", 0)
+#meta = load_meta(b"brainmodels/basemodel_0816/detector.data")
 
 app = flask.Flask(__name__, static_folder='./public')
 api = Api(app)
@@ -58,12 +61,12 @@ def get_mitosis_segmented_list():
     return jsonify({"files":files})
 
 @app.route('/mitosis/models')
-def get_brain_detection_model():
+def get_mitotic_detection_model():
     files = os.listdir('mitosismodels')
     return jsonify({"files":files})
 
 @app.route('/mitosis/wholeslide')
-def get_brain_wsl_list():
+def get_mitotic_wsl_list():
     files = os.listdir('public/mitosis/wsl')
     return jsonify({"files":files})
 
@@ -117,6 +120,52 @@ def get_detections():
         abort(404)
 
 
+@app.route('/mitosis/detections',methods = ['POST'])
+def get_mitosis_detections():
+    print("Detect image")
+    image = request.files['file']
+    image.save(os.path.join(os.getcwd(), "public/mitosis/segmented/"+ image.filename))
+    # image_path = bytes("public/brain/segmented/"+image.filename, encoding='utf-8')
+    # im = Image.open(image_path)
+    img = Image.open("public/mitosis/segmented/"+image.filename)
+    column = math.ceil(img.size[0]/800)
+    row = math.ceil(img.size[1]/800)
+    new_image = Image.new('RGB', (800*column,800*row), (128, 128, 128))
+    new_image.paste(img, (0, 0))
+
+    detection_results = []
+    for i in range(row):
+        for j in range(column):
+            res = {}
+            res['name'] = "%d_%d.jpg"%(i,j)
+            box = (j*800, i*800, j*800+800, i*800+800)
+            tile = new_image.crop(box)
+            tile.save("public/mitosis/cropped/%s_%d_%d.jpg"%(image.filename,i,j))
+            path = bytes("public/mitosis/cropped/%s_%d_%d.jpg"%(image.filename,i,j), encoding='utf-8')
+            r = detect(mnet,mmeta, path)
+            res['detections'] = r
+            detection_results.append(res)
+            os.remove(path)
+
+    response = {
+        "code":200,
+        "message": "prediction result retrived",
+        "prediction": {
+            "name": image.filename,
+            "detections":detection_results
+        }
+    }
+
+    print(response)
+
+    try:
+        return response
+    except FileNotFoundError:
+        abort(404)
+
+
+
+
 @app.route('/brain/wholeslide/retrievedata',methods = ['POST'])
 def retrieve_data():
     fileName = request.get_json()["name"]
@@ -145,7 +194,7 @@ def retrieve_data():
     return response
 
 @app.route('/mitosis/wholeslide/retrievedata',methods = ['POST'])
-def retrieve_data():
+def mitotic_retrieve_data():
     fileName = request.get_json()["name"]
     print(fileName)
     
@@ -469,7 +518,7 @@ def get_mitosis_dzi_status():
     return response
 
 @app.route('/mitosis/dzi/upload', methods = ['POST'])
-def upload_brainwsl():
+def upload_mitoticwsl():
     fileName = request.headers["name"]
     # foldername = re.sub(r'[^\w]', '_',fileName)
     foldername = fileName
@@ -518,7 +567,7 @@ def upload_brainwsl():
     return response
 
 @app.route('/mitosis/detectwsl/',methods = ['POST'])
-def get_wsl_detections():
+def get_mitotic_wsl_detections():
     fileName = request.get_json()["name"]
 
     # check if detection result exists
@@ -547,7 +596,7 @@ def get_wsl_detections():
         res['name'] = tile
         tile_path = bytes(sub_path+'/'+tile, encoding='utf-8')
         print(tile_path)
-        r = detect(net,meta, tile_path)
+        r = detect(mnet,mmeta, tile_path)
         res['detections'] = r
         detection_results.append(res)
 
@@ -567,4 +616,4 @@ def get_wsl_detections():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='129.100.20.38', port = 80)
+    app.run(debug=True, host='129.100.20.38', port = 8081)
