@@ -21,11 +21,11 @@ import math
 net = load_net(b"brainmodels/basemodel/yolo-obj.cfg", b"brainmodels/basemodel/yolo-obj.backup", 0)
 meta = load_meta(b"brainmodels/basemodel/obj.data")
 
-#mnet = load_net(b"mitosismodels/basemodel/yolov3_custom_mitotic.cfg", b"mitosismodels/basemodel/yolov3_custom_mitotic_best.weights", 0)
-#mmeta = load_meta(b"mitosismodels/basemodel/detector.data")
+mnet = load_net(b"mitosismodels/basemodel/yolov3_custom_mitotic.cfg", b"mitosismodels/basemodel/yolov3_custom_mitotic_best.weights", 0)
+mmeta = load_meta(b"mitosismodels/basemodel/detector.data")
 
-#net = load_net(b"brainmodels/basemodel_0816/yolov3_custom.cfg", b"brainmodels/basemodel_0816/yolov3_custom_pathology_best.weights", 0)
-#meta = load_meta(b"brainmodels/basemodel_0816/detector.data")
+# net = load_net(b"brainmodels/basemodel_0816/yolov3_custom.cfg", b"brainmodels/basemodel_0816/yolov3_custom_pathology_best.weights", 0)
+# meta = load_meta(b"brainmodels/basemodel_0816/detector.data")
 
 app = flask.Flask(__name__, static_folder='./public')
 api = Api(app)
@@ -33,7 +33,7 @@ CORS(app)
 
 @app.route('/')
 def Hello():
-    return "Hello World"
+    return "Hello World! Have a good day!"
 
 @app.route('/brain/segmented')
 def get_brain_segmented_list():
@@ -122,7 +122,7 @@ def get_detections():
 
 @app.route('/mitosis/detections',methods = ['POST'])
 def get_mitosis_detections():
-    print("Detect image")
+    print("Detect mitosis image")
     image = request.files['file']
     image.save(os.path.join(os.getcwd(), "public/mitosis/segmented/"+ image.filename))
     # image_path = bytes("public/brain/segmented/"+image.filename, encoding='utf-8')
@@ -149,7 +149,7 @@ def get_mitosis_detections():
 
     response = {
         "code":200,
-        "message": "prediction result retrived",
+        "message": "mitosis prediction result retrived",
         "prediction": {
             "name": image.filename,
             "detections":detection_results
@@ -449,7 +449,7 @@ def upload_brainwsl():
 
 
 mitosis_wsl_uploads = {}
-@app.route('/mitosisdzi/status',methods = ['GET'])
+@app.route('/mitosis/dzi/status',methods = ['GET'])
 def get_mitosis_dzi_status():
     # storagePath = os.path.join(os.getcwd(), "public/brain/wsl/")
     storagePath = os.path.join("./public/mitosis/wsl/")
@@ -568,6 +568,7 @@ def upload_mitoticwsl():
 
 @app.route('/mitosis/detectwsl/',methods = ['POST'])
 def get_mitotic_wsl_detections():
+
     fileName = request.get_json()["name"]
 
     # check if detection result exists
@@ -606,6 +607,8 @@ def get_mitotic_wsl_detections():
         "all_detections": detection_results
     }
 
+    print(response)
+
     json_data = json.dumps(response)           
     with open("public/mitosis/wsldetections/" + fileName + '.json', "w",encoding='utf-8') as json_file:
         json_file.write(json_data)
@@ -616,4 +619,4 @@ def get_mitotic_wsl_detections():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='129.100.20.38', port = 8081)
+    app.run(debug=True, host='129.100.20.37', port = 8080)

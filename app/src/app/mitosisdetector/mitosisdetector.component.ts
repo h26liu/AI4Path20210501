@@ -60,7 +60,7 @@ export class MitosisdetectorComponent implements OnInit {
     image: any;
     imageName: any;
     systemMsg: string;
-    models: any[] = ['DefaultModel'];
+    models: any = [];
     selectedModel: any;
     labels: Array<string> = [];
     labelsCount: Dictionary<any> = {};
@@ -94,7 +94,7 @@ export class MitosisdetectorComponent implements OnInit {
 
     ngOnInit(): void {
         this.threshold = 0.5;
-        this.selectedModel = this.models[0]; // default model
+        // this.selectedModel = this.models[0]; // default model
 
         this.updateFlags(false, 'loading selected image');
         this.setContainerOverflow('hidden', 'hidden');
@@ -102,9 +102,27 @@ export class MitosisdetectorComponent implements OnInit {
 
         // load image. why using timeout? waiting for DOM elements fully loaded
         setTimeout(() => {
+            this.fetchModelList();
             this.onImageLoad();
             this.initialLoading = false;
         }, 2000);
+    }
+
+
+    fetchModelList() {
+        this.http.get(`${this.BASE_URL}/mitosis/models`).subscribe(
+            (res) => {
+                this.models = (<Object>res)['files'];
+
+                this.selectedModel =
+                    this.models.length !== 0
+                        ? this.models[0]
+                        : 'no available model'; // default model
+            },
+            (err) => {
+                console.log(err);
+            }
+        );
     }
 
     ngOnChanges() {
@@ -187,8 +205,8 @@ export class MitosisdetectorComponent implements OnInit {
                 (res) => {
                     this.popUpNotification(res.code, res.message);
                     // callback data
-                    // console.log(res.prediction)
-                    this.prediction = res.prediction;
+                    console.log(res.prediction)
+                    this.prediction = res.prediction.detections;
                     // processing res data
                     // and generate rects
                     this.drawOnCanvas();
@@ -226,18 +244,24 @@ export class MitosisdetectorComponent implements OnInit {
                 this.height = img.height;
                 canvas.width = this.width;
                 canvas.height = this.height;
+                console.log(this.width)
+                console.log(this.height)
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(img, 0, 0, this.width, this.height);
+
+                console.log("prediction", self.prediction)
 
                 for (let i = 0; i < self.prediction.length; i++) {
                     var name1 = self.prediction[i].name.split(".")
                     var res= name1[0].split("_")
+                    console.log("res is",res)
                     let defaultWidth = 800* Number(res[1])
                     let defaultHeight = 800*Number(res[0])
      
                     for (let j = 0;j < self.prediction[i].detections.length; j++)            
                     {
                         const confidence = self.prediction[i].detections[j][1]
+                        console.log("confidence is",confidence)
                         if (confidence > self.threshold) {
                             const box = self.prediction[i].detections[j][2]
                             let cellname = self.prediction[i].detections[j][0]
@@ -267,7 +291,7 @@ export class MitosisdetectorComponent implements OnInit {
                                 );
                                 context.lineWidth = 2.5;
                                 context.strokeRect(
-                                    box[0]-box[2]/2  + defaultWidth,
+                                    box[0]-box[2]/2 + defaultWidth,
                                     box[1]-box[3]/2 + defaultHeight,
                                     box[2],
                                     box[3]
