@@ -70,6 +70,7 @@ export class MitosisdetectorComponent implements OnInit {
         MFM: '#ffc107',
         MFA: '#28a745',
         MFgranular: '#dc3545',
+        mitosis: '#007bff'
     };
     myChart: any = null;
 

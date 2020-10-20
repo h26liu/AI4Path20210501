@@ -88,7 +88,7 @@ export class Ki67detectorComponent implements OnInit {
 
         const value = event.target.value;
 
-        let response = await fetch(`${this.BASE_URL}/ki67/${value}`);
+        let response = await fetch(`${this.BASE_URL}/public/ki67/original/${value}`);
         let data = await response.blob();
         let metadata = {
             type: 'image/jpeg',
